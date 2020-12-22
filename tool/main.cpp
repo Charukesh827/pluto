@@ -148,6 +148,8 @@ void usage_message(void) {
                   "1)\n");
   fprintf(stdout,
           "       --readscop                Read input from a scoplib file\n");
+  fprintf(stdout, "       --indvar_type             Type for the induction "
+                  "variable (32 or 64, default: 32)\n");
   fprintf(stdout,
           "       --bee                     Generate pragmas for Bee+Cl@k\n\n");
   fprintf(stdout, "       --indent  | -i            Indent generated code "
@@ -261,12 +263,13 @@ int main(int argc, char *argv[]) {
 #endif
     {"islsolve", no_argument, &options->islsolve, 1},
     {"time", no_argument, &options->time, 1},
+    {"indvar_type", required_argument, 0, 't'},
     {0, 0, 0, 0}
   };
 
   /* Read command-line options */
   while (1) {
-    int option = getopt_long(argc, argv, "bhiqvf:l:F:L:c:o:", pluto_options,
+    int option = getopt_long(argc, argv, "bhiqvf:l:F:L:c:o:t:", pluto_options,
                              &option_index);
 
     if (option == -1) {
@@ -325,6 +328,9 @@ int main(int argc, char *argv[]) {
       options->silent = 1;
       break;
     case 's':
+      break;
+    case 't':
+      options->indvar_type = atoi(optarg);
       break;
     case 'u':
       options->ufactor = atoi(optarg);
