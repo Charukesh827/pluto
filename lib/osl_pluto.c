@@ -11,11 +11,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "osl_pluto.h"
+#include "pluto/osl_pluto.h"
 
 #include "constraints.h"
 #include "math_support.h"
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
 #include "pluto/matrix.h"
 #include "pluto/pluto.h"
 #include "pluto_codegen_if.h"

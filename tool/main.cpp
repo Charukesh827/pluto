@@ -1,12 +1,22 @@
 /*
- * Pluto: An automatic parallelizer and locality optimizer
+ * PLUTO: An automatic parallelizer and locality optimizer
  *
  * Copyright (C) 2007-2015 Uday Bondhugula
  *
  * This file is part of Pluto.
  *
- * This software is available under the MIT license, a copy of which can be
- * found in the file `LICENSE' in the top-level directory.
+ * Pluto is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * A copy of the GNU General Public Licence can be found in the file
+ * `LICENSE' in the top-level directory of this distribution.
  *
  * Top-level file for 'pluto' executable.
  */
@@ -24,9 +34,9 @@
 #endif
 
 #include "math_support.h"
-#include "osl_pluto.h"
 #include "pet_to_pluto.h"
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
+#include "pluto/osl_pluto.h"
 #include "pluto/pluto.h"
 #include "post_transform.h"
 #include "program.h"
@@ -155,6 +165,8 @@ void usage_message(void) {
                   "1)\n");
   fprintf(stdout,
           "       --readscop                Read input from a scoplib file\n");
+  fprintf(stdout, "       --indvar_type             Type for the induction "
+                  "variable (32 or 64, default: 32)\n");
   fprintf(stdout,
           "       --bee                     Generate pragmas for Bee+Cl@k\n\n");
   fprintf(stdout, "       --indent  | -i            Indent generated code "
@@ -232,6 +244,7 @@ int main(int argc, char *argv[]) {
     {"cloogl", required_argument, 0, 'L'},
     {"cloogsh", no_argument, &options->cloogsh, 1},
     {"nocloogbacktrack", no_argument, &options->cloogbacktrack, 0},
+    {"cyclesize", required_argument, 0, 'S'},
     {"forceparallel", required_argument, 0, 'p'},
     {"ft", required_argument, 0, 'f'},
     {"lt", required_argument, 0, 'l'},
@@ -271,12 +284,13 @@ int main(int argc, char *argv[]) {
 #endif
     {"islsolve", no_argument, &options->islsolve, 1},
     {"time", no_argument, &options->time, 1},
+    {"indvar_type", required_argument, 0, 't'},
     {0, 0, 0, 0}
   };
 
   /* Read command-line options */
   while (1) {
-    int option = getopt_long(argc, argv, "bhiqvf:l:F:L:c:o:", pluto_options,
+    int option = getopt_long(argc, argv, "bhiqvf:l:F:L:c:o:t:", pluto_options,
                              &option_index);
 
     if (option == -1) {
@@ -349,6 +363,9 @@ int main(int argc, char *argv[]) {
       options->silent = 1;
       break;
     case 's':
+      break;
+    case 't':
+      options->indvar_type = atoi(optarg);
       break;
     case 'u':
       options->ufactor = atoi(optarg);
@@ -552,6 +569,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
     isl_ctx *pctx = isl_ctx_alloc_with_pet_options();
     struct pet_scop *pscop =
         pet_scop_extract_from_C_source(pctx, srcFileName, NULL);
+    pet_scop_dump(pscop);
 
     if (!pscop) {
       fprintf(
@@ -607,6 +625,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
       }
       fclose(src_fp);
 
+      osl_scop_print(stdout, scop);
+
       if (!scop || !scop->statement) {
         fprintf(stderr, "Error extracting polyhedra from source file: \'%s'\n",
                 srcFileName);
@@ -636,6 +656,10 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
     osl_irregular_free(irreg_ext);
   }
   IF_MORE_DEBUG(pluto_prog_print(stdout, prog));
+
+  // pluto_populate_scop(scop, prog, context);
+  // osl_scop_print(stdout, scop);
+  // return 0;
 
   int dim_sum = 0;
   for (unsigned i = 0; i < prog->nstmts; i++) {
@@ -839,3 +863,4 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
 
   return 0;
 }
+

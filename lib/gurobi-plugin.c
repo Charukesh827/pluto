@@ -13,7 +13,7 @@
 #include <stdio.h>
 #ifdef GUROBI
 #include "constraints.h"
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
 #include "pluto/matrix.h"
 #include "pluto/pluto.h"
 #include <assert.h>

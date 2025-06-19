@@ -16,14 +16,10 @@ endif
 bin_PROGRAMS = pluto
 
 pluto_SOURCES = \
-		ast_transform.h \
-		ast_transform.c \
 		constraints_polylib.c \
 		constraints_polylib.h \
 		main.cpp \
-		osl_pluto.c \
 		pet_to_pluto.cpp \
-		pluto_codegen_if.c \
 		version.h
 
 pluto_CXXFLAGS = $(OPT_FLAGS) $(DEBUG_FLAGS) \
@@ -51,7 +47,12 @@ pluto_CFLAGS = $(AM_CFLAGS) $(pluto_CXXFLAGS)
 pluto_LDFLAGS = -static
 # libpet needs to come later after libisl so that the right isl is linked.
 pluto_LDADD =  \
+   ../piplib/libpiplib_dp.la \
+   ../openscop/libosl.la \
+   ../clan/libclan.la \
    ../cloog-isl/libcloog-isl.la \
+   ../pet/libpet.la \
+   $(ISL_LIBADD) \
    ../polylib/libpolylib64.la \
    ../clan/libclan.la \
    ../candl/libcandl.la \
