@@ -21,13 +21,13 @@
 
 #include "constraints.h"
 #include "math_support.h"
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
 #include "pluto/matrix.h"
 #include "pluto/pluto.h"
 #include "program.h"
 
 /// Run Pluto on the supplied PlutoProg.
-static int pluto_schedule_prog(PlutoProg *prog) {
+int pluto_schedule_prog(PlutoProg *prog) {
   // Set global var for rest of Pluto.
   PlutoOptions *options = prog->context->options;
 

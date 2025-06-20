@@ -1,4 +1,4 @@
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
 #ifndef TILESIZESELECTIONMODEL_H
 #define TILESIZESELECTIONMODEL_H
 

@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "pluto.h"
+#include "pluto/internal/pluto.h"
 
 PlutoConstraints *pluto_constraints_union(const PlutoConstraints *cst1,
                                           const PlutoConstraints *cst2) {

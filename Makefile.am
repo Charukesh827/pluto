@@ -4,6 +4,7 @@
 # Copyright (C) 2007 Uday Bondhugula
 #
 #
+
 RM = rm -f
 LN = ln -s
 
@@ -16,20 +17,32 @@ ISL_INCLUDE += -I$(top_srcdir)/isl/include -I$(top_builddir)/isl/include
 ISL_LIBADD += $(top_builddir)/isl/libisl.la
 endif
 
-SUBDIRS = piplib $(MAY_ISL) lib polylib openscop cloog-isl clan candl pet tool
+
+SUBDIRS = piplib polylib $(MAY_ISL) openscop cloog-isl clan candl pet lib tool
 
 ACLOCAL_AMFLAGS = -I m4
 
 dist-hook:
 	rm -rf `find $(distdir)/doc -name CVS`
 
-bin_SCRIPTS = polycc getversion.sh
-CLEANFILES = $(bin_SCRIPTS) parsetab.py test_libpluto unit_tests
+
+bin_SCRIPTS = polycc plutune getversion.sh
+CLEANFILES: $(bin_SCRIPTS) parsetab.py
 EXTRA_DIST = polycc.sh.in  examples test
 
-pkginclude_HEADERS = include/pluto/pluto.h include/pluto/matrix.h
+pkginclude_HEADERS = \
+	include/pluto/pluto.h \
+	include/pluto/matrix.h \
+	include/pluto/osl_pluto.h 
+
+internalincludedir = $(includedir)/pluto/internal
+internalinclude_HEADERS= \
+	include/pluto/internal/pluto.h \
+	include/pluto/internal/ast_transform.h
+
 
 polycc: polycc.sh
+	rm -f polycc
 	echo "#! " $(BASH) > polycc
 	cat polycc.sh >> polycc
 	chmod ugo+x polycc
@@ -51,10 +64,10 @@ pclean:
 	$(MAKE) -C tool clean
 
 test_libpluto: test/test_libpluto.c
-	libtool --mode=link --tag=CC $(CC) $(CFLAGS) $<  -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I openscop/include -lpluto -lgomp -o test_libpluto
+	libtool --mode=link --tag=CC $(CC) $(CLFAGS) $<  -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I openscop/include -lpluto -lgomp -o test_libpluto
 
 unit_tests: test/unit_tests.c
-	libtool --mode=link --tag=CC $(CC) $(CFLAGS) $< -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I$(top_srcdir)/lib -lpluto -o unit_tests
+	libtool --mode=link --tag=CC $(CC) $(CLFAGS) $< -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I$(top_srcdir)/lib -lpluto -o unit_tests
 
 force:
 	true
@@ -65,7 +78,7 @@ libpluto: force
 pluto: libpluto
 	$(MAKE) $(MFLAGS) -C tool pluto
 
-check-pluto: PHONY
+test: PHONY
 
 PHONY: pluto polycc test_libpluto unit_tests
 	./test.sh
@@ -81,3 +94,4 @@ test-alt: polycc pluto
 	./test-alt.sh --silent --maxfuse --cloogsh --nocloogbacktrack
 	./test-alt.sh --silent --nofuse
 	./test-alt.sh --silent --iss
+
