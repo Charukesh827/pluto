@@ -9,9 +9,12 @@ RM = rm -f
 LN = ln -s
 
 MAY_ISL = isl
-ISL_INCLUDE += -I$(top_srcdir)/isl/include -I$(top_builddir)/isl/include
-ISL_LIBADD += $(top_builddir)/isl/libisl.la
+ISL_INCLUDE = -I$(top_srcdir)/Polygeist/pluto/pluto/isl/include -I$(top_builddir)/Polygeist/pluto/pluto/isl/include
+ISL_LIBADD = $(top_builddir)/Polygeist/pluto/pluto/isl/libisl.la
 
+# Print confirmation of isl path
+all-local:
+	@echo "Using isl from $(top_srcdir)/isl for Pluto project"
 
 SUBDIRS = piplib polylib $(MAY_ISL) openscop cloog-isl clan candl pet lib tool
 
@@ -59,10 +62,12 @@ pclean:
 	$(MAKE) -C tool clean
 
 test_libpluto: test/test_libpluto.c
-	libtool --mode=link --tag=CC $(CC) $(CLFAGS) $<  -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I openscop/include -lpluto -lgomp -o test_libpluto
+	@echo "Compiling test_libpluto with isl from $(top_srcdir)/isl"
+	libtool --mode=link --tag=CC $(CC) $(CFLAGS) $< -Llib/.libs/ -I$(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -Iopenscop/include -lpluto -lgomp -o test_libpluto
 
 unit_tests: test/unit_tests.c
-	libtool --mode=link --tag=CC $(CC) $(CLFAGS) $< -Llib/.libs/ -I $(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I$(top_srcdir)/lib -lpluto -o unit_tests
+	@echo "Compiling unit_tests with isl from $(top_srcdir)/isl"
+	libtool --mode=link --tag=CC $(CC) $(CFLAGS) $< -Llib/.libs/ -I$(top_srcdir)/include $(ISL_INCLUDE) $(ISL_LIBADD) -I$(top_srcdir)/lib -lpluto -o unit_tests
 
 force:
 	true
@@ -89,4 +94,3 @@ test-alt: polycc pluto
 	./test-alt.sh --silent --maxfuse --cloogsh --nocloogbacktrack
 	./test-alt.sh --silent --nofuse
 	./test-alt.sh --silent --iss
-
