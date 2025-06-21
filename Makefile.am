@@ -8,14 +8,9 @@
 RM = rm -f
 LN = ln -s
 
-if EXTERNAL_ISL
-MAY_ISL =
-# ISL_INCLUDE and ISL_LIBADD were already defined
-else
 MAY_ISL = isl
 ISL_INCLUDE += -I$(top_srcdir)/isl/include -I$(top_builddir)/isl/include
 ISL_LIBADD += $(top_builddir)/isl/libisl.la
-endif
 
 
 SUBDIRS = piplib polylib $(MAY_ISL) openscop cloog-isl clan candl pet lib tool
