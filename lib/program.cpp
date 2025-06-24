@@ -390,7 +390,7 @@ extern "C" __isl_give isl_basic_map *isl_basic_map_reset_space(
 	__isl_take isl_basic_map *bmap, __isl_take isl_space *space);
 
 /* Check if 'map' is single-valued along a particular dimension */
-isl_bool isl_map_dim_is_single_valued(__isl_keep isl_map *map, int pos)
+extern "C" isl_bool isl_map_dim_is_single_valued(__isl_keep isl_map *map, int pos)
 {
     isl_bool sv;
     int n_out;
@@ -415,7 +415,7 @@ isl_bool isl_map_dim_is_single_valued(__isl_keep isl_map *map, int pos)
 
 /* Given a map A -> [B -> C], extract the map A -> B.
  */
-__isl_give isl_basic_map *isl_basic_map_range_factor_domain(__isl_take isl_basic_map *bmap)
+extern "C" __isl_give isl_basic_map *isl_basic_map_range_factor_domain(__isl_take isl_basic_map *bmap)
 {
        isl_space *space;
       int total, keep;
