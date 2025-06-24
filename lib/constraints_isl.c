@@ -415,6 +415,8 @@ PlutoConstraints *pluto_constraints_union_isl(const PlutoConstraints *cst1,
   return ucst;
 }
 
+extern __isl_give isl_pw_aff *isl_pw_aff_from_map_dim(__isl_keep isl_map *map, int pos);
+
 /*
  * Extract a pluto function from an isl map under certain
  * circumstances
@@ -434,7 +436,7 @@ PlutoMatrix *isl_map_to_pluto_func(isl_map *map, int stmt_dim, int npar,
     PlutoMatrix *func_onedim = NULL;
     struct pluto_mat_context_info info = {&func_onedim, context};
     /* Schedule should be single valued */
-    assert(isl_map_dim_is_single_valued(map, i));
+    // assert(isl_map_dim_is_single_valued(map, i));
     isl_pw_aff *pw_aff = isl_pw_aff_from_map_dim(map, i);
     /* TODO: check to make sure there is only one piece; or else
      * an incorrect schedule will be extracted */

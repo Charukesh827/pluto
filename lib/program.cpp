@@ -34,6 +34,7 @@
 #include "isl/map.h"
 #include "isl/space.h"
 #include "isl/union_map.h"
+#include "isl/map_type.h"
 
 void pluto_add_dep(PlutoProg *prog, Dep *dep) {
   dep->id = prog->ndeps;
@@ -354,6 +355,87 @@ struct pluto_extra_dep_info {
   int index;
   PlutoContext *context;
 };
+
+
+/* Create a piecewise quasi affine expression equivalent to a particular
+ * dimension of an isl_map. Return NULL if that is not possible.
+ */
+extern "C" __isl_give isl_pw_aff *isl_pw_aff_from_map_dim(__isl_keep isl_map *map, int pos)
+{
+    isl_map *tmap;
+    int n_out;
+
+    if (!map) return NULL;
+
+    n_out = isl_map_dim(map, isl_dim_out);
+
+    if (pos < 0 || pos >= n_out) {
+        isl_die(isl_map_get_ctx(map), isl_error_invalid,
+                "dim position out of bounds", return NULL);
+    }
+
+    tmap = isl_map_copy(map);
+    tmap = isl_map_project_out(tmap, isl_dim_out, pos+1, n_out-pos-1);
+    tmap = isl_map_project_out(tmap, isl_dim_out, 0, pos);
+
+    isl_pw_multi_aff *pw_m_aff =  isl_pw_multi_aff_from_map(tmap);
+    isl_pw_aff  *pw_aff = isl_pw_multi_aff_get_pw_aff(pw_m_aff, 0);
+
+    isl_pw_multi_aff_free(pw_m_aff);
+
+    return pw_aff;
+}
+
+extern "C" __isl_give isl_basic_map *isl_basic_map_reset_space(
+	__isl_take isl_basic_map *bmap, __isl_take isl_space *space);
+
+/* Check if 'map' is single-valued along a particular dimension */
+isl_bool isl_map_dim_is_single_valued(__isl_keep isl_map *map, int pos)
+{
+    isl_bool sv;
+    int n_out;
+    isl_map *tmap;
+
+    n_out = isl_map_dim(map, isl_dim_out);
+
+    if (pos < 0 || pos >= n_out) {
+        isl_die(isl_map_get_ctx(map), isl_error_invalid,
+           "dim position out of bounds", return isl_bool_false);
+    }
+
+    tmap = isl_map_project_out(isl_map_copy(map), isl_dim_out,
+            pos+1, n_out-pos-1);
+    tmap = isl_map_project_out(tmap, isl_dim_out, 0, pos);
+
+    sv = isl_map_is_single_valued(tmap);
+    isl_map_free(tmap);
+
+    return sv ;
+}
+
+/* Given a map A -> [B -> C], extract the map A -> B.
+ */
+__isl_give isl_basic_map *isl_basic_map_range_factor_domain(__isl_take isl_basic_map *bmap)
+{
+       isl_space *space;
+      int total, keep;
+
+       if (!bmap)
+               return NULL;
+      
+       if (!isl_space_range_is_wrapping(isl_basic_map_get_space(bmap)))
+               isl_die(isl_basic_map_get_ctx(bmap), isl_error_invalid,
+                       "range is not a product", return isl_basic_map_free(bmap));
+
+       space = isl_basic_map_get_space(bmap);
+       total = isl_space_dim(space, isl_dim_out);
+       space = isl_space_range_factor_domain(space);
+       keep = isl_space_dim(space, isl_dim_out);
+       bmap = isl_basic_map_project_out(bmap, isl_dim_out, keep, total - keep);
+       bmap = isl_basic_map_reset_space(bmap, space);
+
+       return bmap;
+}
 
 /* Convert an isl_basic_map describing part of a dependence to a Dep.
  * The names of the input and output spaces are of the form S_d or S_d_e
